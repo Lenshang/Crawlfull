@@ -1,0 +1,2 @@
+SQLAlchemy==2.0.34
+exobject=1.0
