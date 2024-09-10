@@ -18,8 +18,10 @@ class ArticleInfo(Base):
     state = Column(
         TINYINT(3), server_default=text("'0'"), nullable=False, index=True, comment="状态 0=初始化 1=已抓取 2=已解析入库 -1=抓取失败"
     )
+    content_url = Column(String(256), nullable=True, comment="下载后文章URL")
     downloader = Column(String(16), server_default=text("'default'"), comment="下载器,默认default为request下载器")
     parser = Column(String(16), server_default=text("'default'"), comment="解析器,默认default则走URL正则匹配")
+    depth = Column(TINYINT(1), server_default=text("'0'"), comment="抓取深度")
     errMsg = Column(String(255), nullable=True, comment="错误信息")
     createdTime = Column(TIMESTAMP, nullable=False, server_default=func.now())
     updateTime = Column(TIMESTAMP, nullable=False, server_default=func.now(), onupdate=func.now())

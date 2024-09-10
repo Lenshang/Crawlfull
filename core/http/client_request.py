@@ -1,5 +1,6 @@
 import requests
 import os
+from .response import Response
 
 
 class ClientRequest:
@@ -20,7 +21,7 @@ class ClientRequest:
             "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
         }
 
-    def get(self, url, _retry=0, **kwargs):
+    def get(self, url, _retry=0, **kwargs) -> Response:
         try:
             if kwargs.get("d_proxies"):
                 if os.environ.get("DEPLOY_ENV") == "develop":
@@ -28,7 +29,7 @@ class ClientRequest:
                 del kwargs["d_proxies"]
             response = requests.get(url, headers=self.headers, **kwargs)
             if response.status_code == 200:
-                return response
+                return Response.from_pyrequests(response)
             elif _retry < self.retry:
                 return self.get(url, _retry + 1, **kwargs)
             else:
@@ -39,11 +40,11 @@ class ClientRequest:
             else:
                 return None
 
-    def post(self, url, body, _retry=0, **kwargs):
+    def post(self, url, body, _retry=0, **kwargs) -> Response:
         try:
             response = requests.post(url, data=body, headers=self.headers, **kwargs)
             if response.status_code == 200:
-                return response
+                return Response.from_pyrequests(response)
             elif _retry < self.retry:
                 return self.post(url, body, _retry + 1, **kwargs)
             else:

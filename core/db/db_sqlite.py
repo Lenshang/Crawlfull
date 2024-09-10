@@ -8,13 +8,8 @@ import os
 
 class DbSession:
     def __init__(self, name) -> None:
-        # full_path = os.path.join(config.get("FS", "FS_BASE_PATH"), name.replace(".", "_") + ".db")
-        full_path = os.path.join(name.replace(".", "_") + ".db")
+        full_path = os.path.join(config.get("FS", "FS_BASE_PATH"), name.replace(".", "_") + ".db")
         engine = None
-        # if not os.path.exists(full_path):
-        #     engine = create_engine("sqlite:///" + full_path, pool_size=100, pool_recycle=7200)
-        #     FileData.metadata.create_all(engine)
-        # else:
         engine = create_engine("sqlite:///" + full_path, pool_size=100, pool_recycle=7200)
 
         _Seesion = sessionmaker(bind=engine, autoflush=False, autocommit=False)
