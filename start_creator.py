@@ -1,9 +1,10 @@
 from loguru import logger
-from core.site import debug_creator
+from creator import debug_creator
 from core.db.db_core import DbSession
 from core.utils.filter import url_addfilter, url_exist
 from core.handler.queue_handler import add_download_task
 import config
+import spiders
 
 logger.add("log/creator/{time}.log", rotation="1 day", retention="7 days")
 

@@ -1,10 +1,13 @@
-import uvicorn
+import io
 import config
-from fastapi import FastAPI, APIRouter
+import threading
+from fastapi import FastAPI, APIRouter, File, UploadFile
 from starlette.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from core.handler.file_handler import reg_downloader_node, get_file
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
+from core.handler.file_handler import reg_downloader_node, get_file, add_file
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from downloader.main import start_loop
+from multiprocessing import Process, Value
 
 api_router = APIRouter()
 NODE_NAME = config.get("DOWNLOADER", "NODE_NAME")
@@ -20,22 +23,30 @@ async def get(id: str):
     item = get_file(id, NODE_NAME)
     if "text" in item.contentType:
         return HTMLResponse(item.content, media_type=item.contentType)
-    elif "json" in item.conteType:
+    elif "json" in item.contentType:
         return JSONResponse(item.content, media_type=item.contentType)
     else:
-        return FileResponse(item.content, media_type=item.contentType)
+        stream = io.BytesIO(item.content)
+        return StreamingResponse(stream, media_type=item.contentType)
+
+
+@api_router.post("/update")
+async def update(file: UploadFile = File(...)):
+    return add_file(file.file.read())
 
 
 def create_service() -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        # on start
-        # 注册节点信息到REDIS
+        # on start 注册节点信息到REDIS
         reg_downloader_node(NODE_NAME, config.get("DOWNLOADER", "DOWNLOADER_SERVICE_URL"))
-        # TODO 启动下载进程
+        # 启动下载进程
+        running = Value("d", 1)
+        loop_process = Process(target=start_loop, args=(running,))
+        loop_process.start()
         yield
-        # on close
-        # TODO 关闭下载进程
+        # on close 关闭下载线程
+        running.value = -1
 
     application = FastAPI(title="Crawlfull-Downloader RestApi", lifespan=lifespan)
     application.debug = True

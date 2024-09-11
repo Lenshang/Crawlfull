@@ -16,7 +16,11 @@ class ArticleInfo(Base):
     language = Column(String(10), server_default=text("'zh-Hans'"), comment="文章语言")
     addInfo = Column(TEXT, nullable=True, comment="额外信息(json格式)")
     state = Column(
-        TINYINT(3), server_default=text("'0'"), nullable=False, index=True, comment="状态 0=初始化 1=已抓取 2=已解析入库 -1=抓取失败"
+        TINYINT(3),
+        server_default=text("'0'"),
+        nullable=False,
+        index=True,
+        comment="状态 0=初始化 1=已抓取 2=已解析 3=媒体已下载 -1=抓取失败",
     )
     content_url = Column(String(256), nullable=True, comment="下载后文章URL")
     downloader = Column(String(16), server_default=text("'default'"), comment="下载器,默认default为request下载器")

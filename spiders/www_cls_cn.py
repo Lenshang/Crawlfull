@@ -1,8 +1,13 @@
 # 财联社新闻
 from core.http.client_request import ClientRequest
-from core.site import reg_creator
+from core.model.article_detail import ArticleDetail
 from core.model.article_info import ArticleInfo
+from core.model.file_data import FileData
+from core.utils.htmlparse import article_node_parser, _article_node_parser
+from creator import reg_creator
+from parser import reg_parser
 from ExObject.ExObject import ExObject
+from ExObject.ExParsel import ExSelector
 from urllib.parse import urljoin, urlencode
 import config
 import json
@@ -50,3 +55,26 @@ def crawler(info):
             addInfo["reading_num"] = item["?reading_num"].ToCleanString()
             dbItem.addInfo = json.dumps(addInfo)
             yield dbItem
+
+
+@reg_parser("\/\/www\.cls\.cn\/detail\/")
+def parser(parse_info, articleinfo: ArticleInfo, fileinfo: FileData):
+    response = fileinfo.content.decode("utf-8")
+    item = ArticleDetail.from_article_info(articleinfo)
+    selector = ExSelector(response)
+    # 解析文章
+    contentNode = selector.xpath("//div[@class='clearfix content-main-box']/div[@class='f-l content-left']/node()")
+
+    def filter_node(name, tag: ExSelector):
+        cls_str = tag.xpath("@class").FirstOrDefaultString()
+        return cls_str in ["m-b-20 f-s-14 l-h-2 c-999 clearfix"]
+
+    def stop_on(name, tag: ExSelector):
+        cls_str = tag.xpath("@class").FirstOrDefaultString()
+        return cls_str in ["bg-c-fff detail-option-box"]
+
+    content = article_node_parser(contentNode, True, filter=filter_node, stop_on=stop_on)
+    item.content = content
+    if item.addInfo and item.addInfo.get("source"):
+        item.author = item.addInfo["source"]
+    return item

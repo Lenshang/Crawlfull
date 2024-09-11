@@ -3,11 +3,17 @@ from loguru import logger
 import traceback
 
 
-def add_download_task(id):
+def add(k, v):
     try:
-        get_redis_client().rpush("download_task", id)
+        client = get_redis_client()
+        client.lrem(k, 0, v)
+        client.rpush(k, v)
     except Exception as e:
         logger.error(traceback.format_exc())
+
+
+def add_download_task(id, type="html"):
+    add("download_task", id + " " + type)
 
 
 def get_download_task():
@@ -19,10 +25,7 @@ def get_download_task():
 
 
 def add_parse_task(id):
-    try:
-        get_redis_client().rpush("parse_task", id)
-    except Exception as e:
-        logger.error(traceback.format_exc())
+    add("parse_task", id)
 
 
 def get_parse_task():
