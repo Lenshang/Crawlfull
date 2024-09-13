@@ -2,9 +2,11 @@ from loguru import logger
 from core.db.db_core import DbSession
 from core.handler.file_handler import add_file
 from core.handler.mongodb_handler import MongoHandler
-from core.handler.queue_handler import get_download_task, add_parse_task
+from core.handler.queue_handler import add_process_task, get_download_task, add_parse_task
 from core.handler.article_handler import get_article_info
+from core.handler.spider_handler import get_spider_info
 from core.model.article_info import ArticleInfo
+from core.model.spider_info import SpiderInfo
 from downloader import downloaderMapper
 from sqlalchemy.orm import Session
 import config
@@ -29,7 +31,7 @@ def download_img(info: ArticleInfo):
         mongo.updateContent(info.id, content)
 
 
-def download_task(db: Session, info: ArticleInfo, tp: str):
+def download_task(db: Session, info: ArticleInfo, spider_info: SpiderInfo, tp: str):
 
     try:
         if tp == "html":
@@ -46,9 +48,13 @@ def download_task(db: Session, info: ArticleInfo, tp: str):
             info.state = 1
             logger.info(f"下载完成:{info.url}")
         elif tp == "content_img":
-            # TODO 从MONGODB 读取文章 替换文章IMG
+            # 从MONGODB 读取文章 替换文章IMG
             download_img(info)
-            info.state = 3
+            if spider_info.skipProcess:
+                info.state = 100
+            else:
+                info.state = 3
+                add_process_task(info.id)
             pass
         else:
             raise Exception("不支持的类型的下载!")
@@ -76,4 +82,7 @@ def start_loop(stop_flag):
             info = get_article_info(db, id)
             if not info:
                 continue
-            download_task(db, info, tp)
+            spider_info = get_spider_info(db, info.spiderId)
+            if not spider_info:
+                continue
+            download_task(db, info, spider_info, tp)

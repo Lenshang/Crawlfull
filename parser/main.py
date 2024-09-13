@@ -1,5 +1,6 @@
 import config
 
+from core.handler.spider_handler import get_spider_info
 import spiders
 import concurrent.futures
 import time
@@ -30,6 +31,9 @@ def parse_task(article_id):
             article_info = get_article_info(db, article_id)
             if not article_info or not article_info.content_url:
                 raise Exception("找不到对应文章信息,或文章信息中content_url为空!")
+            spider_info = get_spider_info(db, article_info.spiderId)
+            if not spider_info:
+                raise Exception("找不到对应爬虫信息!是否修改过爬虫ID?")
             content_url = urlparse(article_info.content_url)
             download_nodename = content_url.netloc
             download_id = content_url.path[1:]
@@ -51,8 +55,13 @@ def parse_task(article_id):
                 save_task(result)
             else:
                 raise Exception("解析器返回数据为空!")
-            if parser_info["skip_image_download"]:
-                article_info.state = 3  # 跳过图片下载的话直接标记为3
+
+            # 判断是否跳过图片下载以及解析
+            if spider_info.skipMediaDownload == 1:
+                if spider_info.skipProcess == 1:
+                    article_info.state = 100
+                else:
+                    article_info.state = 3
             else:
                 article_info.state = 2
                 # 添加任务到downloader 队列

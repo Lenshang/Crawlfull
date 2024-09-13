@@ -9,14 +9,6 @@ import traceback
 lock = RLock()
 
 
-def reg_downloader_node(node_name, node_url):
-    """注册下载节点信息到REDIS"""
-    try:
-        get_redis_client().set("downloader_node:" + node_name, node_url)
-    except Exception as e:
-        logger.error(traceback.format_exc())
-
-
 def add_file(url, content, contentType, httpCode, db_name):
     with lock:
         with DbSession(db_name) as db:

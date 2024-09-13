@@ -3,8 +3,9 @@ from core.http.client_request import ClientRequest
 from core.model.article_detail import ArticleDetail
 from core.model.article_info import ArticleInfo
 from core.model.file_data import FileData
+from core.model.spider_info import SpiderInfo
 from core.utils.htmlparse import article_node_parser, _article_node_parser
-from creator import reg_creator
+from creator import reg_spider
 from parser import reg_parser
 from ExObject.ExObject import ExObject
 from ExObject.ExParsel import ExSelector
@@ -15,8 +16,8 @@ import json
 from core.utils.common import clean_url, md5hex
 
 
-@reg_creator("www.cls.cn", cron="", enable=True, debug=True)
-def crawler(info):
+@reg_spider("www.cls.cn", enable=True, debug=True)
+def crawler(spider_info: SpiderInfo):
     """www.cls.cn"""
     client = ClientRequest()
     urls = [
@@ -38,7 +39,7 @@ def crawler(info):
                 **{
                     "id": md5hex(clean_url(url)),
                     "url": url,
-                    "domain": info["domain"],
+                    "domain": spider_info.domain,
                     "title": item["?title"].ToCleanString(),
                     "description": item["?brief"].ToCleanString(),
                 }

@@ -4,7 +4,8 @@ import threading
 from fastapi import FastAPI, APIRouter, File, UploadFile
 from starlette.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from core.handler.file_handler import reg_downloader_node, get_file, add_file
+from core.handler.file_handler import get_file, add_file
+from core.handler.node_handler import reg_downloader_node
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from downloader.main import start_loop
 from multiprocessing import Process, Value
