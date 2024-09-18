@@ -18,7 +18,7 @@ class SpiderInfo(Base):
     nextRunTime = Column(BIGINT(13), nullable=False, comment="下次运行时间 13位时间戳")
     skipMediaDownload = Column(TINYINT(1), server_default=text("'0'"), comment="是否跳过媒体下载 0=否 1=是")
     skipProcess = Column(TINYINT(1), server_default=text("'0'"), comment="是否跳过后续处理器 0=否 1=是")
-    enabled = Column(TINYINT(1), server_default=text("'1'"), comment="是否启用 0=否 1=是")
+    enable = Column(TINYINT(1), server_default=text("'1'"), comment="是否启用 0=否 1=是")
     addOptions = Column(TEXT, nullable=True, comment="额外配置(json格式)")
     createdTime = Column(TIMESTAMP, nullable=False, server_default=func.now())
     updateTime = Column(TIMESTAMP, nullable=False, server_default=func.now(), onupdate=func.now())

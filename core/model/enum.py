@@ -19,8 +19,8 @@ class ArticleType(Enum):
 
 
 class SpiderState(Enum):
-    enabled = 1
-    disabled = 0
+    enable = 1
+    disable = 0
 
 
 class Language(Enum):
@@ -49,7 +49,6 @@ class Language(Enum):
     nl = "nl"
     pl = "pl"
     ro = "ro"
-    tr = "tr"
     id = "id"
 
 

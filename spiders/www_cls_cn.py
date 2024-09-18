@@ -16,7 +16,7 @@ import json
 from core.utils.common import clean_url, md5hex
 
 
-@reg_spider("www.cls.cn", enable=True, debug=True)
+@reg_spider("www.cls.cn", cron="0 22 * * ?", enable=True, debug=True)  # 每天22点执行
 def crawler(spider_info: SpiderInfo):
     """www.cls.cn"""
     client = ClientRequest()

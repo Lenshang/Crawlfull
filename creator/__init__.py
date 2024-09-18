@@ -2,6 +2,7 @@ import re
 import os
 import importlib
 import traceback
+from typing import Generator
 import config
 from ExObject.ExParsel import ExSelector
 from sqlalchemy.orm import Session
@@ -19,6 +20,7 @@ def reg_spider(
     description="",
     skipMediaDownload=False,
     skipProcess=False,
+    max_depth=0,
     downloader="default",
     parser="default",
     processer="default",
@@ -34,6 +36,7 @@ def reg_spider(
     @description: 爬虫描述 \n
     @skipMediaDownload: 是否跳过媒体下载 \n
     @skipProcess: 是否跳过后续处理器 \n
+    @max_depth: 爬虫最大抓取深度 \n
     @downloader: 下载器 默认default \n
     @parser: 解析器 默认default \n
     @processer: 后续处理器 默认default \n
@@ -49,6 +52,7 @@ def reg_spider(
             "id": id,
             "domain": domain if domain else id,
             "cron": cron,
+            "max_depth": max_depth,
             "description": description,
             "skipMediaDownload": skipMediaDownload,
             "skipProcess": skipProcess,
@@ -60,7 +64,6 @@ def reg_spider(
             "enable": enable,
             "debug": debug,
         }
-        # TODO INIT DB
         return func
 
     return decorator

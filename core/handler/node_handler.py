@@ -7,6 +7,14 @@ from threading import RLock
 import traceback
 
 
+def _get(k):
+    try:
+        r = get_redis_client().get(k)
+        return r.decode("utf-8") if r else None
+    except Exception as e:
+        logger.error(traceback.format_exc())
+
+
 def reg_downloader_node(node_name, node_url):
     """注册下载节点信息到REDIS"""
     try:
@@ -17,10 +25,7 @@ def reg_downloader_node(node_name, node_url):
 
 def get_downloader_node(node_name):
     """获取下载节点信息"""
-    try:
-        return get_redis_client().get("downloader_node:" + node_name)
-    except Exception as e:
-        logger.error(traceback.format_exc())
+    return _get("downloader_node:" + node_name)
 
 
 def reg_master_node(node_name):
@@ -32,7 +37,4 @@ def reg_master_node(node_name):
 
 def get_master_node():
     """获取master节点信息"""
-    try:
-        return get_redis_client().get("master_node")
-    except Exception as e:
-        logger.error(traceback.format_exc())
+    return _get("master_node")
