@@ -1,9 +1,14 @@
 import re
 import threading
 import os
+
+import pytz
+import config
 from hashlib import md5
 from croniter import croniter
 from datetime import datetime
+
+timezone = config.get("COMMON", "TIMEZONE")
 
 
 def clean_url(origin_url):
@@ -33,9 +38,10 @@ def now_ts():
 
 
 def get_next_runtime(cron, start):
-    cr = croniter(cron)
-    r = cr.get_next(start_time=start / 1000)
+    dt = datetime.fromtimestamp(start / 1000, pytz.timezone(timezone))
+    cr = croniter(cron, start_time=dt)
+    r = cr.get_next()
     _now = now().timestamp()
     while r < _now:
-        r = cr.get_next(start_time=r)
+        r = cr.get_next()
     return int(r * 1000)
